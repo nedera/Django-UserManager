@@ -40,16 +40,12 @@ class UserLoginSerializer(serializers.ModelSerializer):
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'email', 'name']
+        fields = ['id', 'email', 'name', 'is_admin']
 
 
 class UserChangePWSerializer(serializers.Serializer):
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True, max_length=255)
     password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True, max_length=255)
-
-    class Meta:
-        model = User
-        fields = ['password', 'password2']
 
     def validate(self, attrs):
         password = attrs.get('password')
@@ -65,10 +61,6 @@ class UserChangePWSerializer(serializers.Serializer):
 class SendPWDResetEmailSerializer(serializers.Serializer):
     email = serializers.EmailField(max_length=255)
 
-    class Meta:
-        model = User
-        fields = ['email']
-
     def validate(self, attrs):
         email = attrs.get('email')
         if User.objects.filter(email=email).exists():
@@ -77,7 +69,7 @@ class SendPWDResetEmailSerializer(serializers.Serializer):
             print('Encoded UID', uid)
             token = PasswordResetTokenGenerator().make_token(user)
             print('PWD reset token', token)
-            link = 'http://localhost:3000/api/user/reset/{}/{}'.format(uid, token)
+            link = 'http://localhost:3000/api/user/reset/{}/{}/'.format(uid, token)
             print('PWD reset link', link)
             # Send email
             body = 'Click here to reset your password {}'.format(link)
@@ -96,10 +88,6 @@ class SendPWDResetEmailSerializer(serializers.Serializer):
 class UserResetPWDSerializer(serializers.Serializer):
     password = serializers.CharField(style={'input_type': 'password'}, write_only=True, max_length=255)
     password2 = serializers.CharField(style={'input_type': 'password'}, write_only=True, max_length=255)
-
-    class Meta:
-        model = User
-        fields = ['password', 'password2']
 
     def validate(self, attrs):
         try:
